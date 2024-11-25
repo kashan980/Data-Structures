@@ -1,0 +1,391 @@
+#include <iostream>
+#include <fstream>
+#include <conio.h>
+using namespace std;
+
+// Node Class
+class book {
+	struct Node {
+		int book_id;
+		string book_name;
+		string author_name;
+		int ISBN;
+		Node* next;
+	};
+
+public:
+	Node* head = NULL;
+
+	// Check Function to check if Record Already Exists or Not
+	bool check(int x) {
+		if (head == NULL)
+			return false;
+
+		Node* t = head;
+		while (t != NULL) {
+			if (t->book_id == x)
+				return true;
+			t = t->next;
+		}
+
+		return false;
+	}
+
+	// Function to insert the record
+	void Insert_Record(int book_id, string book_name, string author_name, int ISBN) {
+		if (check(book_id)) {
+			cout << "Book with this record Already Exists\n";
+			return;
+		}
+
+		Node* t = new Node();
+		t->book_id = book_id;
+		t->book_name = book_name;
+		t->author_name = author_name;
+		t->ISBN = ISBN;
+		t->next = NULL;
+
+		if (head == NULL || (head->book_id >= t->book_id)) {
+			t->next = head;
+			head = t;
+		}
+		else {
+			Node* c = head;
+			while (c->next != NULL && c->next->book_id < t->book_id) {
+				c = c->next;
+			}
+			t->next = c->next;
+			c->next = t;
+		}
+
+		cout << "Record Inserted Successfully\n";
+	}
+
+	// Function to search record for any book with book_id number
+	void Search_Record(int book_id) {
+		if (!head) {
+			cout << "No such Record Available\n";
+			return;
+		}
+		else {
+			Node* p = head;
+			while (p) {
+				if (p->book_id == book_id) {
+					cout << "Book ID Number\t" << p->book_id << endl;
+					cout << "Book Name\t\t" << p->book_name << endl;
+					cout << "Author Name\t" << p->author_name << endl;
+					cout << "ISBN\t\t" << p->ISBN << endl;
+					return;
+				}
+				p = p->next;
+			}
+
+			if (p == NULL)
+				cout << "No such Record Available\n";
+		}
+	}
+
+	// Function to delete book record with given book_id number
+	int Delete_Record(int book_id) {
+		Node* t = head;
+		Node* p = NULL;
+
+		if (t != NULL && t->book_id == book_id) {
+			head = t->next;
+			delete t;
+
+			cout << "Record Deleted Successfully\n";
+			return 0;
+		}
+
+		while (t != NULL && t->book_id != book_id) {
+			p = t;
+			t = t->next;
+		}
+
+		if (t == NULL) {
+			cout << "Record does not Exist\n";
+			return -1;
+		}
+
+		p->next = t->next;
+		delete t;
+		cout << "Record Deleted Successfully\n";
+
+		return 0;
+	}
+
+	// Function to display all book records
+	void Show_Record() {
+		Node* p = head;
+		if (p == NULL) {
+			cout << "No Record Available\n";
+		}
+		else {
+			cout << "Index\tBook Name\tAuthor Name\tISBN\n";
+			int index = 1;
+			while (p) {
+				cout << index << "\t" << p->book_name << "\t\t" << p->author_name << "\t\t" << p->ISBN << endl;
+				p = p->next;
+				index++;
+			}
+		}
+	}
+
+	// Function to read records from file
+	void Read_File() {
+		ifstream fin("book_records.txt");
+		if (!fin) {
+			cout << "Error opening file\n";
+			return;
+		}
+
+		int book_id, ISBN;
+		string book_name, author_name;
+		while (fin >> book_id >> book_name >> author_name >> ISBN) {
+			Insert_Record(book_id, book_name, author_name, ISBN);
+		}
+
+		cout << "Records Read Successfully\n";
+		fin.close();
+	}
+
+	// Function to write records to file
+	void Write_File() {
+		ofstream fout("book_records.txt");
+		if (!fout) {
+			cout << "Error opening file\n";
+			return;
+		}
+
+		Node* p = head;
+		while (p) {
+			fout << p->book_id << " " << p->book_name << " " << p->author_name << " " << p->ISBN << endl;
+			p = p->next;
+		}
+
+		cout << "Records Written Successfully\n";
+		fout.close();
+	}
+};
+
+// Queue Class
+class bookissus {
+	struct bookissue {
+		int book_id;
+		string book_name;
+		string student_name;
+		bookissue* next;
+	};
+
+public:
+	bookissue* front = NULL;
+	bookissue* rear = NULL;
+
+	// Check Function to check if Record Already Exists or Not
+	bool check(int x) {
+		if (front == NULL)
+			return false;
+
+		bookissue* t = front;
+		while (t != NULL) {
+			if (t->book_id == x)
+				return true;
+			t = t->next;
+		}
+
+		return false;
+	}
+
+	// Function to issue (enqueue) a book
+	void Enqueue_Book(int book_id, string book_name, string student_name) {
+		if (check(book_id)) {
+			cout << "Book Already Issued\n";
+			return;
+		}
+
+		bookissue* t = new bookissue();
+		t->book_id = book_id;
+		t->book_name = book_name;
+		t->student_name = student_name;
+		t->next = NULL;
+
+		if (front == NULL) {
+			front = rear = t;
+		}
+		else {
+			rear->next = t;
+			rear = t;
+		}
+
+		cout << "Book Issued Successfully\n";
+	}
+
+	// Function to return (dequeue) a book
+	int Dequeue_Book() {
+		if (front == NULL) {
+			cout << "No Book Issued\n";
+			return -1;
+		}
+
+		bookissue* t = front;
+		front = front->next;
+		delete t;
+
+		cout << "Book Returned Successfully\n";
+
+		if (front == NULL)
+			rear = NULL;
+
+		return 0;
+	}
+
+	// Function to display the book at the front of the queue
+	void Front_Book() {
+		if (front == NULL) {
+			cout << "No Book Issued\n";
+		}
+		else {
+			cout << "Book ID\tBook Name\tStudent Name\n";
+			cout << front->book_id << "\t" << front->book_name << "\t\t" << front->student_name << endl;
+		}
+	}
+
+	// Function to display all the books issued
+	void Show_Issued_Books() {
+		if (front == NULL) {
+			cout << "No Book Issued\n";
+		}
+		else {
+			cout << "Book ID\tBook Name\tStudent Name\n";
+			bookissue* p = front;
+			while (p) {
+				cout << p->book_id << "\t" << p->book_name << "\t\t" << p->student_name << endl;
+				p = p->next;
+			}
+		}
+	}
+
+	// Function to read issued books from file
+	void Read_File() {
+		ifstream fin("issued_books.txt");
+		if (!fin) {
+			cout << "Error opening file\n";
+			return;
+		}
+
+		int book_id;
+		string book_name, student_name;
+		while (fin >> book_id >> book_name >> student_name) {
+			Enqueue_Book(book_id, book_name, student_name);
+		}
+
+		cout << "Issued Books Read Successfully\n";
+		fin.close();
+	}
+
+	// Function to write issued books to file
+	void Write_File() {
+		ofstream fout("issued_books.txt");
+		if (!fout) {
+			cout << "Error opening file\n";
+			return;
+		}
+
+		bookissue* p = front;
+		while (p) {
+			fout << p->book_id << " " << p->book_name << " " << p->student_name << endl;
+			p = p->next;
+		}
+
+		cout << "Issued Books Written Successfully\n";
+		fout.close();
+	}
+};
+
+int main() {
+	book b;
+	bookissus bi;
+
+	int choice;
+	do {
+		cout << "\n********** Library Management System **********\n";
+		cout << "1. Insert Book Record\n";
+		cout << "2. Search Book Record\n";
+		cout << "3. Delete Book Record\n";
+		cout << "4. Show All Book Records\n";
+		cout << "5. Issue a Book\n";
+		cout << "6. Return a Book\n";
+		cout << "7. Display Front Book\n";
+		cout << "8. Display All Issued Books\n";
+		cout << "9. Exit\n";
+		cout << "Enter your choice: ";
+		cin >> choice;
+
+		switch (choice) {
+		case 1: {
+			int book_id, ISBN;
+			string book_name, author_name;
+			cout << "Enter Book ID: ";
+			cin >> book_id;
+			cout << "Enter Book Name: ";
+			cin.ignore();
+			getline(cin, book_name);
+			cout << "Enter Author Name: ";
+			getline(cin, author_name);
+			cout << "Enter ISBN: ";
+			cin >> ISBN;
+			b.Insert_Record(book_id, book_name, author_name, ISBN);
+			break;
+		}
+		case 2: {
+			int book_id;
+			cout << "Enter Book ID to Search: ";
+			cin >> book_id;
+			b.Search_Record(book_id);
+			break;
+		}
+		case 3: {
+			int book_id;
+			cout << "Enter Book ID to Delete: ";
+			cin >> book_id;
+			b.Delete_Record(book_id);
+			break;
+		}
+		case 4:
+			b.Show_Record();
+			break;
+		case 5: {
+			int book_id;
+			string book_name, student_name;
+			cout << "Enter Book ID to Issue: ";
+			cin >> book_id;
+			cout << "Enter Book Name: ";
+			cin.ignore();
+			getline(cin, book_name);
+			cout << "Enter Student Name: ";
+			getline(cin, student_name);
+			bi.Enqueue_Book(book_id, book_name, student_name);
+			break;
+		}
+		case 6:
+			bi.Dequeue_Book();
+			break;
+		case 7:
+			bi.Front_Book();
+			break;
+		case 8:
+			bi.Show_Issued_Books();
+			break;
+		case 9: {
+			b.Write_File();
+			bi.Write_File();
+			exit(0);
+		}
+		default:
+			cout << "Invalid Choice\n";
+		}
+	} while (choice != 9);
+
+	return 0;
+}
